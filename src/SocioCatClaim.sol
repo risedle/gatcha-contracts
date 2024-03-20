@@ -15,15 +15,17 @@ contract SocioCatClaim is Ownable2Step {
 
     error InvalidSignature();
     error ExceedingMaxAmount();
+    error ZeroAddress();
 
     event Claimed(address indexed to, uint256 amount);
+    event SignerSet(address indexed signer);
 
     constructor(
         IERC20 _token,
         address _signer,
         address _owner
     ) Ownable(_owner) {
-        signer = _signer;
+        _setSigner(_signer);
         token = _token;
     }
 
@@ -57,5 +59,17 @@ contract SocioCatClaim is Ownable2Step {
         token.safeTransfer(receiver, amount);
 
         emit Claimed(msg.sender, amount);
+    }
+
+    function setSigner(address _signer) external onlyOwner {
+        _setSigner(_signer);
+    }
+
+    function _setSigner(address _signer) private {
+        if (_signer == address(0)) {
+            revert ZeroAddress();
+        }
+        signer = _signer;
+        emit SignerSet(_signer);
     }
 }
