@@ -13,6 +13,7 @@ contract SocioCatClaimTest is Test {
     uint256 public signerKey;
 
     event Claimed(address indexed to, uint256 amount);
+    event SignerSet(address indexed signer);
 
     function setUp() public {
         (signer, signerKey) = makeAddrAndKey("alice");
@@ -116,6 +117,46 @@ contract SocioCatClaimTest is Test {
 
         vm.expectRevert(SocioCatClaim.ExceedingMaxAmount.selector);
         claim.claim(100, 100, signature, address(0));
+        vm.stopPrank();
+    }
+
+    function test_setSigner() public {
+        (address newSigner, ) = makeAddrAndKey("newSigner");
+        // --
+
+        vm.startPrank(owner);
+        claim.setSigner(newSigner);
+        vm.stopPrank();
+
+        assertEq(claim.signer(), newSigner);
+    }
+
+    function test_setSigner_rejectsZeroSigner() public {
+        vm.expectRevert(SocioCatClaim.ZeroAddress.selector);
+
+        vm.startPrank(owner);
+        claim.setSigner(address(0));
+        vm.stopPrank();
+    }
+
+    function test_setSigner_rejectsNotOwner() public {
+        (address newSigner, ) = makeAddrAndKey("newSigner");
+        // --
+
+        vm.expectRevert();
+        claim.setSigner(newSigner);
+        vm.stopPrank();
+    }
+
+    function test_setSigner_emitsSignerSet() public {
+        (address newSigner, ) = makeAddrAndKey("newSigner");
+        // --
+
+        vm.expectEmit(address(claim));
+        emit SignerSet(newSigner);
+
+        vm.startPrank(owner);
+        claim.setSigner(newSigner);
         vm.stopPrank();
     }
 
