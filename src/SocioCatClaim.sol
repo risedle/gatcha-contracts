@@ -12,7 +12,11 @@ contract SocioCatClaim {
         token = _token;
     }
 
-    function claim(address to, uint256 amount) external {
-        token.safeTransfer(to, amount);
+    function claim(uint256 amount, address receiver) external {
+        if (receiver == address(0)) {
+            receiver = msg.sender;
+        }
+
+        token.safeTransfer(receiver, amount);
     }
 }

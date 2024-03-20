@@ -19,7 +19,7 @@ contract SocioCatClaimTest is Test {
         token.mint(address(claim), 100);
         // --
 
-        claim.claim(vitalik, 100);
+        claim.claim(100, vitalik);
 
         assertEq(token.balanceOf(address(claim)), 0);
         assertEq(token.balanceOf(vitalik), 100);
