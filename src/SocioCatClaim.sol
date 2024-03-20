@@ -10,6 +10,8 @@ contract SocioCatClaim {
     IERC20 public immutable token;
     address public signer;
 
+    mapping(uint256 => bool) public nonceUsed;
+
     error InvalidSignature();
     error InvalidNonce();
 
@@ -26,6 +28,9 @@ contract SocioCatClaim {
         bytes calldata signature,
         address receiver
     ) external {
+        if (nonceUsed[nonce]) {
+            revert InvalidNonce();
+        }
         if (
             !SignatureChecker.isValidSignatureNow(
                 signer,
@@ -40,6 +45,7 @@ contract SocioCatClaim {
             receiver = msg.sender;
         }
 
+        nonceUsed[nonce] = true;
         token.safeTransfer(receiver, amount);
     }
 }
