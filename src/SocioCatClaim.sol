@@ -7,9 +7,9 @@ import {SignatureChecker} from "@openzeppelin/contracts/utils/cryptography/Signa
 
 contract SocioCatClaim {
     using SafeERC20 for IERC20;
+
     IERC20 public immutable token;
     address public signer;
-
     mapping(uint256 => bool) public nonceUsed;
 
     error InvalidSignature();
