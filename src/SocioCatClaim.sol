@@ -8,11 +8,21 @@ contract SocioCatClaim {
     using SafeERC20 for IERC20;
     IERC20 public immutable token;
 
+    error InvalidSignature();
+    error InvalidNonce();
+
+    event Claimed(address indexed to, uint256 amount);
+
     constructor(IERC20 _token) {
         token = _token;
     }
 
-    function claim(uint256 amount, address receiver) external {
+    function claim(
+        uint256 amount,
+        uint256 nonce,
+        bytes calldata signature,
+        address receiver
+    ) external {
         if (receiver == address(0)) {
             receiver = msg.sender;
         }
