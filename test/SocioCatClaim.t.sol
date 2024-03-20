@@ -20,6 +20,7 @@ contract SocioCatClaimTest is Test {
 
         vm.startPrank(vitalik);
         claim.claim(100, address(0));
+        claim.claim(100, vitalik);
 
         assertEq(token.balanceOf(address(claim)), 0);
         assertEq(token.balanceOf(vitalik), 100);
