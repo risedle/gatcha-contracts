@@ -4,8 +4,9 @@ pragma solidity =0.8.25;
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import {SignatureChecker} from "@openzeppelin/contracts/utils/cryptography/SignatureChecker.sol";
+import {Ownable2Step, Ownable} from "@openzeppelin/contracts/access/Ownable2Step.sol";
 
-contract SocioCatClaim {
+contract SocioCatClaim is Ownable2Step {
     using SafeERC20 for IERC20;
 
     IERC20 public immutable token;
@@ -17,7 +18,11 @@ contract SocioCatClaim {
 
     event Claimed(address indexed to, uint256 amount);
 
-    constructor(IERC20 _token, address _signer) {
+    constructor(
+        IERC20 _token,
+        address _signer,
+        address _owner
+    ) Ownable(_owner) {
         signer = _signer;
         token = _token;
     }

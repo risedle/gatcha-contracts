@@ -9,14 +9,16 @@ contract SocioCatClaimTest is Test {
     SocioCatClaim public claim;
     Token public token;
     address public signer;
+    address public owner;
     uint256 public signerKey;
 
     event Claimed(address indexed to, uint256 amount);
 
     function setUp() public {
         (signer, signerKey) = makeAddrAndKey("alice");
+        (owner, ) = makeAddrAndKey("owner");
         token = new Token();
-        claim = new SocioCatClaim(token, signer);
+        claim = new SocioCatClaim(token, signer, owner);
     }
 
     function test_claim() public {

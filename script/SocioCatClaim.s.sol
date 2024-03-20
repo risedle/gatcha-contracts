@@ -10,8 +10,9 @@ contract SocioCatClaimScript is Script {
         uint256 deployerPrivateKey = uint256(vm.envBytes32("PRIVATE_KEY"));
         IERC20 token = IERC20(vm.envAddress("TOKEN"));
         address signer = vm.envAddress("SIGNER");
+        address owner = vm.envAddress("OWNER");
         vm.startBroadcast(deployerPrivateKey);
 
-        claim = new SocioCatClaim(token, signer);
+        claim = new SocioCatClaim(token, signer, owner);
     }
 }
