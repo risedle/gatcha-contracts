@@ -47,5 +47,7 @@ contract SocioCatClaim {
 
         nonceUsed[nonce] = true;
         token.safeTransfer(receiver, amount);
+
+        emit Claimed(msg.sender, amount);
     }
 }
