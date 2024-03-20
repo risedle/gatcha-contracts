@@ -7,13 +7,15 @@ import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol
 contract SocioCatClaim {
     using SafeERC20 for IERC20;
     IERC20 public immutable token;
+    address public signer;
 
     error InvalidSignature();
     error InvalidNonce();
 
     event Claimed(address indexed to, uint256 amount);
 
-    constructor(IERC20 _token) {
+    constructor(IERC20 _token, address _signer) {
+        signer = _signer;
         token = _token;
     }
 
