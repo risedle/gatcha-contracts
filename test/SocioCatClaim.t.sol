@@ -24,11 +24,10 @@ contract SocioCatClaimTest is Test {
         token.mint(address(claim), 100);
         // --
 
-        uint256 nonce = vm.getBlockTimestamp();
-        bytes memory signature = getSignature(vitalik, 100, nonce);
+        bytes memory signature = getSignature(vitalik, 100, 100);
 
         vm.startPrank(vitalik);
-        claim.claim(100, nonce, signature, address(0));
+        claim.claim(100, 100, signature, address(0));
 
         assertEq(token.balanceOf(address(claim)), 0);
         assertEq(token.balanceOf(vitalik), 100);
@@ -39,14 +38,13 @@ contract SocioCatClaimTest is Test {
         token.mint(address(claim), 100);
         // --
 
-        uint256 nonce = vm.getBlockTimestamp();
-        bytes memory signature = getSignature(vitalik, 100, nonce);
+        bytes memory signature = getSignature(vitalik, 100, 100);
 
         vm.expectEmit(address(claim));
         emit Claimed(vitalik, 100);
 
         vm.startPrank(vitalik);
-        claim.claim(100, nonce, signature, address(0));
+        claim.claim(100, 100, signature, address(0));
     }
 
     function test_claimToReceiver() public {
@@ -55,57 +53,79 @@ contract SocioCatClaimTest is Test {
         token.mint(address(claim), 100);
         // --
 
-        uint256 nonce = vm.getBlockTimestamp();
-        bytes memory signature = getSignature(vitalik, 100, nonce);
+        bytes memory signature = getSignature(vitalik, 100, 100);
 
         vm.startPrank(vitalik);
-        claim.claim(100, nonce, signature, receiver);
+        claim.claim(100, 100, signature, receiver);
         vm.stopPrank();
 
         assertEq(token.balanceOf(address(claim)), 0);
         assertEq(token.balanceOf(receiver), 100);
     }
 
-    function test_rejectsInvalidSignature() public {
+    function test_rejectsInvalidSignature_invalidAmount() public {
         address vitalik = 0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045;
         token.mint(address(claim), 100);
         // --
 
-        uint256 nonce = vm.getBlockTimestamp();
-        bytes memory signature = getSignature(vitalik, 100, nonce);
+        bytes memory signature = getSignature(vitalik, 100, 100);
 
         vm.expectRevert(SocioCatClaim.InvalidSignature.selector);
 
         vm.startPrank(vitalik);
-        claim.claim(1000, nonce, signature, address(0));
+        claim.claim(1000, 100, signature, address(0));
         vm.stopPrank();
     }
 
-    function test_rejectsReusingSameNonce() public {
+    function test_rejectsInvalidSignature_invalidMaxAmount() public {
         address vitalik = 0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045;
         token.mint(address(claim), 100);
         // --
 
-        uint256 nonce = vm.getBlockTimestamp();
-        bytes memory signature = getSignature(vitalik, 100, nonce);
+        bytes memory signature = getSignature(vitalik, 100, 100);
+
+        vm.expectRevert(SocioCatClaim.InvalidSignature.selector);
 
         vm.startPrank(vitalik);
-        claim.claim(100, nonce, signature, address(0));
+        claim.claim(100, 1000, signature, address(0));
+        vm.stopPrank();
+    }
 
-        vm.expectRevert(SocioCatClaim.InvalidNonce.selector);
-        claim.claim(100, nonce, signature, address(0));
+    function test_rejectsInvalidSignature_sender() public {
+        address vitalik = 0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045;
+        token.mint(address(claim), 100);
+        // --
+
+        bytes memory signature = getSignature(vitalik, 100, 100);
+
+        vm.expectRevert(SocioCatClaim.InvalidSignature.selector);
+        claim.claim(100, 100, signature, address(0));
+    }
+
+    function test_rejectsReusingSignature() public {
+        address vitalik = 0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045;
+        token.mint(address(claim), 100);
+        // --
+
+        bytes memory signature = getSignature(vitalik, 100, 100);
+
+        vm.startPrank(vitalik);
+        claim.claim(100, 100, signature, address(0));
+
+        vm.expectRevert(SocioCatClaim.ExceedingMaxAmount.selector);
+        claim.claim(100, 100, signature, address(0));
         vm.stopPrank();
     }
 
     function getSignature(
         address to,
         uint256 amount,
-        uint256 nonce
+        uint256 maxAmount
     ) private returns (bytes memory signature) {
         vm.startPrank(signer);
         (uint8 v, bytes32 r, bytes32 s) = vm.sign(
             signerKey,
-            keccak256(abi.encodePacked(to, amount, nonce))
+            keccak256(abi.encodePacked(to, amount, maxAmount))
         );
         signature = abi.encodePacked(r, s, v);
         vm.stopPrank();
