@@ -10,10 +10,10 @@ contract SocioCatClaim {
 
     IERC20 public immutable token;
     address public signer;
-    mapping(uint256 => bool) public nonceUsed;
+    mapping(address => uint256) public claimedAmounts;
 
     error InvalidSignature();
-    error InvalidNonce();
+    error ExceedingMaxAmount();
 
     event Claimed(address indexed to, uint256 amount);
 
@@ -24,17 +24,14 @@ contract SocioCatClaim {
 
     function claim(
         uint256 amount,
-        uint256 nonce,
+        uint256 maxAmount,
         bytes calldata signature,
         address receiver
     ) external {
-        if (nonceUsed[nonce]) {
-            revert InvalidNonce();
-        }
         if (
             !SignatureChecker.isValidSignatureNow(
                 signer,
-                keccak256(abi.encodePacked(msg.sender, amount, nonce)),
+                keccak256(abi.encodePacked(msg.sender, amount, maxAmount)),
                 signature
             )
         ) {
@@ -45,7 +42,13 @@ contract SocioCatClaim {
             receiver = msg.sender;
         }
 
-        nonceUsed[nonce] = true;
+        uint256 claimed = claimedAmounts[msg.sender];
+        uint256 resultant = claimed + amount;
+        if (resultant > maxAmount) {
+            revert ExceedingMaxAmount();
+        }
+
+        claimedAmounts[msg.sender] = resultant;
         token.safeTransfer(receiver, amount);
 
         emit Claimed(msg.sender, amount);
