@@ -18,7 +18,7 @@ contract SocioCatClaim is Ownable2Step {
     error ZeroAddress();
 
     event Claimed(address indexed to, uint256 amount);
-    event SignerSet(address indexed signer);
+    event SignerUpdated(address indexed signer);
 
     constructor(
         IERC20 _token,
@@ -70,6 +70,6 @@ contract SocioCatClaim is Ownable2Step {
             revert ZeroAddress();
         }
         signer = _signer;
-        emit SignerSet(_signer);
+        emit SignerUpdated(_signer);
     }
 }

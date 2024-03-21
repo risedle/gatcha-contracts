@@ -13,7 +13,7 @@ contract SocioCatClaimTest is Test {
     uint256 public signerKey;
 
     event Claimed(address indexed to, uint256 amount);
-    event SignerSet(address indexed signer);
+    event SignerUpdated(address indexed signer);
 
     function setUp() public {
         (signer, signerKey) = makeAddrAndKey("alice");
@@ -148,12 +148,12 @@ contract SocioCatClaimTest is Test {
         vm.stopPrank();
     }
 
-    function test_setSigner_emitsSignerSet() public {
+    function test_setSigner_emitsSignerUpdated() public {
         (address newSigner, ) = makeAddrAndKey("newSigner");
         // --
 
         vm.expectEmit(address(claim));
-        emit SignerSet(newSigner);
+        emit SignerUpdated(newSigner);
 
         vm.startPrank(owner);
         claim.setSigner(newSigner);
