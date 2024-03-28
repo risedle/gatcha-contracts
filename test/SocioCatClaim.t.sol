@@ -4,6 +4,7 @@ pragma solidity =0.8.25;
 import "forge-std/Test.sol";
 import {SocioCatClaim} from "../src/SocioCatClaim.sol";
 import {Token} from "../src/mocks/Token.sol";
+import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 
 contract SocioCatClaimTest is Test {
     SocioCatClaim public claim;
@@ -143,9 +144,13 @@ contract SocioCatClaimTest is Test {
         (address newSigner, ) = makeAddrAndKey("newSigner");
         // --
 
-        vm.expectRevert();
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                Ownable.OwnableUnauthorizedAccount.selector,
+                address(this)
+            )
+        );
         claim.setSigner(newSigner);
-        vm.stopPrank();
     }
 
     function test_setSigner_emitsSignerUpdated() public {
