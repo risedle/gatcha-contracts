@@ -4,19 +4,23 @@ pragma solidity =0.8.25;
 import "forge-std/Test.sol";
 import {SocioCatClaim} from "../src/SocioCatClaim.sol";
 import {Token} from "../src/mocks/Token.sol";
+import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 
 contract SocioCatClaimTest is Test {
     SocioCatClaim public claim;
     Token public token;
     address public signer;
+    address public owner;
     uint256 public signerKey;
 
     event Claimed(address indexed to, uint256 amount);
+    event SignerUpdated(address indexed signer);
 
     function setUp() public {
         (signer, signerKey) = makeAddrAndKey("alice");
+        (owner, ) = makeAddrAndKey("owner");
         token = new Token();
-        claim = new SocioCatClaim(token, signer);
+        claim = new SocioCatClaim(token, signer, owner);
     }
 
     function test_claim() public {
@@ -114,6 +118,50 @@ contract SocioCatClaimTest is Test {
 
         vm.expectRevert(SocioCatClaim.ExceedingMaxAmount.selector);
         claim.claim(100, 100, signature, address(0));
+        vm.stopPrank();
+    }
+
+    function test_setSigner() public {
+        (address newSigner, ) = makeAddrAndKey("newSigner");
+        // --
+
+        vm.startPrank(owner);
+        claim.setSigner(newSigner);
+        vm.stopPrank();
+
+        assertEq(claim.signer(), newSigner);
+    }
+
+    function test_setSigner_rejectsZeroSigner() public {
+        vm.expectRevert(SocioCatClaim.ZeroAddress.selector);
+
+        vm.startPrank(owner);
+        claim.setSigner(address(0));
+        vm.stopPrank();
+    }
+
+    function test_setSigner_rejectsNotOwner() public {
+        (address newSigner, ) = makeAddrAndKey("newSigner");
+        // --
+
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                Ownable.OwnableUnauthorizedAccount.selector,
+                address(this)
+            )
+        );
+        claim.setSigner(newSigner);
+    }
+
+    function test_setSigner_emitsSignerUpdated() public {
+        (address newSigner, ) = makeAddrAndKey("newSigner");
+        // --
+
+        vm.expectEmit(address(claim));
+        emit SignerUpdated(newSigner);
+
+        vm.startPrank(owner);
+        claim.setSigner(newSigner);
         vm.stopPrank();
     }
 
