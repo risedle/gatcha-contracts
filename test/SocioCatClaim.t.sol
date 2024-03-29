@@ -28,10 +28,11 @@ contract SocioCatClaimTest is Test {
         token.mint(address(claim), 100);
         // --
 
-        bytes memory signature = getSignature(vitalik, 100, 100);
+        uint256 expiredAt = block.timestamp + 1;
+        bytes memory signature = getSignature(vitalik, 100, 100, expiredAt);
 
         vm.startPrank(vitalik);
-        claim.claim(100, 100, signature, address(0));
+        claim.claim(100, 100, expiredAt, signature, address(0));
 
         assertEq(token.balanceOf(address(claim)), 0);
         assertEq(token.balanceOf(vitalik), 100);
@@ -42,13 +43,14 @@ contract SocioCatClaimTest is Test {
         token.mint(address(claim), 100);
         // --
 
-        bytes memory signature = getSignature(vitalik, 100, 100);
+        uint256 expiredAt = block.timestamp + 1;
+        bytes memory signature = getSignature(vitalik, 100, 100, expiredAt);
 
         vm.expectEmit(address(claim));
         emit Claimed(vitalik, 100);
 
         vm.startPrank(vitalik);
-        claim.claim(100, 100, signature, address(0));
+        claim.claim(100, 100, expiredAt, signature, address(0));
     }
 
     function test_claimToReceiver() public {
@@ -57,10 +59,11 @@ contract SocioCatClaimTest is Test {
         token.mint(address(claim), 100);
         // --
 
-        bytes memory signature = getSignature(vitalik, 100, 100);
+        uint256 expiredAt = block.timestamp + 1;
+        bytes memory signature = getSignature(vitalik, 100, 100, expiredAt);
 
         vm.startPrank(vitalik);
-        claim.claim(100, 100, signature, receiver);
+        claim.claim(100, 100, expiredAt, signature, receiver);
         vm.stopPrank();
 
         assertEq(token.balanceOf(address(claim)), 0);
@@ -72,12 +75,13 @@ contract SocioCatClaimTest is Test {
         token.mint(address(claim), 100);
         // --
 
-        bytes memory signature = getSignature(vitalik, 100, 100);
+        uint256 expiredAt = block.timestamp + 1;
+        bytes memory signature = getSignature(vitalik, 100, 100, expiredAt);
 
         vm.expectRevert(SocioCatClaim.InvalidSignature.selector);
 
         vm.startPrank(vitalik);
-        claim.claim(1000, 100, signature, address(0));
+        claim.claim(1000, 100, expiredAt, signature, address(0));
         vm.stopPrank();
     }
 
@@ -86,12 +90,13 @@ contract SocioCatClaimTest is Test {
         token.mint(address(claim), 100);
         // --
 
-        bytes memory signature = getSignature(vitalik, 100, 100);
+        uint256 expiredAt = block.timestamp + 1;
+        bytes memory signature = getSignature(vitalik, 100, 100, expiredAt);
 
         vm.expectRevert(SocioCatClaim.InvalidSignature.selector);
 
         vm.startPrank(vitalik);
-        claim.claim(100, 1000, signature, address(0));
+        claim.claim(100, 1000, expiredAt, signature, address(0));
         vm.stopPrank();
     }
 
@@ -100,10 +105,11 @@ contract SocioCatClaimTest is Test {
         token.mint(address(claim), 100);
         // --
 
-        bytes memory signature = getSignature(vitalik, 100, 100);
+        uint256 expiredAt = block.timestamp + 1;
+        bytes memory signature = getSignature(vitalik, 100, 100, expiredAt);
 
         vm.expectRevert(SocioCatClaim.InvalidSignature.selector);
-        claim.claim(100, 100, signature, address(0));
+        claim.claim(100, 100, expiredAt, signature, address(0));
     }
 
     function test_rejectsReusingSignature() public {
@@ -111,13 +117,14 @@ contract SocioCatClaimTest is Test {
         token.mint(address(claim), 100);
         // --
 
-        bytes memory signature = getSignature(vitalik, 100, 100);
+        uint256 expiredAt = block.timestamp + 1;
+        bytes memory signature = getSignature(vitalik, 100, 100, expiredAt);
 
         vm.startPrank(vitalik);
-        claim.claim(100, 100, signature, address(0));
+        claim.claim(100, 100, expiredAt, signature, address(0));
 
         vm.expectRevert(SocioCatClaim.ExceedingMaxAmount.selector);
-        claim.claim(100, 100, signature, address(0));
+        claim.claim(100, 100, expiredAt, signature, address(0));
         vm.stopPrank();
     }
 
@@ -168,12 +175,13 @@ contract SocioCatClaimTest is Test {
     function getSignature(
         address to,
         uint256 amount,
-        uint256 maxAmount
+        uint256 maxAmount,
+        uint256 expiredAt
     ) private returns (bytes memory signature) {
         vm.startPrank(signer);
         (uint8 v, bytes32 r, bytes32 s) = vm.sign(
             signerKey,
-            keccak256(abi.encodePacked(to, amount, maxAmount))
+            keccak256(abi.encodePacked(to, amount, maxAmount, expiredAt))
         );
         signature = abi.encodePacked(r, s, v);
         vm.stopPrank();
