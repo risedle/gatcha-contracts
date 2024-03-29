@@ -128,6 +128,20 @@ contract SocioCatClaimTest is Test {
         vm.stopPrank();
     }
 
+    function test_rejectsExpiredSignature() public {
+        address vitalik = 0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045;
+        token.mint(address(claim), 100);
+        // --
+
+        uint256 expiredAt = block.timestamp;
+        bytes memory signature = getSignature(vitalik, 100, 100, expiredAt);
+
+        vm.startPrank(vitalik);
+        vm.expectRevert(SocioCatClaim.ExpiredSignature.selector);
+        claim.claim(100, 100, expiredAt, signature, address(0));
+        vm.stopPrank();
+    }
+
     function test_setSigner() public {
         (address newSigner, ) = makeAddrAndKey("newSigner");
         // --
