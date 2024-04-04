@@ -14,6 +14,7 @@ contract SocioCatClaim is Ownable2Step {
     mapping(address => uint256) public claimedAmounts;
 
     error InvalidSignature();
+    error ExpiredSignature();
     error ExceedingMaxAmount();
     error ZeroAddress();
 
@@ -32,17 +33,24 @@ contract SocioCatClaim is Ownable2Step {
     function claim(
         uint256 amount,
         uint256 maxAmount,
+        uint256 expiredAt,
         bytes calldata signature,
         address receiver
     ) external {
         if (
             !SignatureChecker.isValidSignatureNow(
                 signer,
-                keccak256(abi.encodePacked(msg.sender, amount, maxAmount)),
+                keccak256(
+                    abi.encodePacked(msg.sender, amount, maxAmount, expiredAt)
+                ),
                 signature
             )
         ) {
             revert InvalidSignature();
+        }
+
+        if (block.timestamp >= expiredAt) {
+            revert ExpiredSignature();
         }
 
         if (receiver == address(0)) {
