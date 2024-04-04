@@ -41,7 +41,13 @@ contract SocioCatClaim is Ownable2Step {
             !SignatureChecker.isValidSignatureNow(
                 signer,
                 keccak256(
-                    abi.encodePacked(msg.sender, amount, maxAmount, expiredAt)
+                    abi.encodePacked(
+                        block.chainid,
+                        msg.sender,
+                        amount,
+                        maxAmount,
+                        expiredAt
+                    )
                 ),
                 signature
             )

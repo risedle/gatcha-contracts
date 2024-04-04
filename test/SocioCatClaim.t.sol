@@ -195,7 +195,15 @@ contract SocioCatClaimTest is Test {
         vm.startPrank(signer);
         (uint8 v, bytes32 r, bytes32 s) = vm.sign(
             signerKey,
-            keccak256(abi.encodePacked(to, amount, maxAmount, expiredAt))
+            keccak256(
+                abi.encodePacked(
+                    block.chainid,
+                    to,
+                    amount,
+                    maxAmount,
+                    expiredAt
+                )
+            )
         );
         signature = abi.encodePacked(r, s, v);
         vm.stopPrank();
