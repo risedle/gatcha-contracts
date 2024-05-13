@@ -13,7 +13,7 @@ contract SocioCatClaimTest is Test {
     address public owner;
     uint256 public signerKey;
 
-    event Claimed(address indexed to, uint256 amount);
+    event Claimed(bytes32 indexed signatureHash, address indexed to, uint256 amount);
     event SignerUpdated(address indexed signer);
 
     function setUp() public {
@@ -47,7 +47,7 @@ contract SocioCatClaimTest is Test {
         bytes memory signature = getSignature(vitalik, 100, 100, expiredAt);
 
         vm.expectEmit(address(claim));
-        emit Claimed(vitalik, 100);
+        emit Claimed(keccak256(signature), vitalik, 100);
 
         vm.startPrank(vitalik);
         claim.claim(100, 100, expiredAt, signature, address(0));
