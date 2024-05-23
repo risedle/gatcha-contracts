@@ -1,66 +1,32 @@
-## Foundry
-
-**Foundry is a blazing fast, portable and modular toolkit for Ethereum application development written in Rust.**
-
-Foundry consists of:
-
--   **Forge**: Ethereum testing framework (like Truffle, Hardhat and DappTools).
--   **Cast**: Swiss army knife for interacting with EVM smart contracts, sending transactions and getting chain data.
--   **Anvil**: Local Ethereum node, akin to Ganache, Hardhat Network.
--   **Chisel**: Fast, utilitarian, and verbose solidity REPL.
-
-## Documentation
-
-https://book.getfoundry.sh/
-
-## Usage
-
-### Build
-
-```shell
-$ forge build
-```
-
-### Test
-
-```shell
-$ forge test
-```
-
-### Format
-
-```shell
-$ forge fmt
-```
-
-### Gas Snapshots
-
-```shell
-$ forge snapshot
-```
-
-### Anvil
-
-```shell
-$ anvil
-```
+## SocioCat Claim
 
 ### Deploy
 
-```shell
-$ forge script script/Counter.s.sol:CounterScript --rpc-url <your_rpc_url> --private-key <your_private_key>
-```
+1. Setup `.env`
 
-### Cast
+    ```
+    # Deployer private key
+    PRIVATE_KEY=
+    # Signer wallet to sign the claim signature
+    SIGNER=
+    # Cat token to claim
+    TOKEN=
+    # Contract owner that can modify `signer`
+    OWNER=
 
-```shell
-$ cast <subcommand>
-```
 
-### Help
+    # Additional
 
-```shell
-$ forge --help
-$ anvil --help
-$ cast --help
-```
+    RPC_URL=
+    ETHERSCAN_API_KEY=
+    ```
+
+2. Run deploy script
+
+    ```shell
+    $ forge script ./script/SocioCatClaim.s.sol \
+    --rpc-url $RPC_URL \ 
+    --broadcast \
+    --verify \
+    --etherscan-api-key $ETHERSCAN_API_KEY
+    ```
