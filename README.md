@@ -24,9 +24,5 @@
 2. Run deploy script
 
     ```shell
-    $ forge script ./script/SocioCatClaim.s.sol \
-    --rpc-url $RPC_URL \ 
-    --broadcast \
-    --verify \
-    --etherscan-api-key $ETHERSCAN_API_KEY
+    $ forge script ./script/SocioCatClaim.s.sol --rpc-url $RPC_URL --broadcast --etherscan-api-key $ETHERSCAN_API_KEY --verify 
     ```
