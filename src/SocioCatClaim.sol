@@ -18,7 +18,11 @@ contract SocioCatClaim is Ownable2Step {
     error ExceedingMaxAmount();
     error ZeroAddress();
 
-    event Claimed(bytes32 indexed signatureHash, address indexed to, uint256 amount);
+    event Claimed(
+        bytes32 indexed signatureHash,
+        address indexed to,
+        uint256 amount
+    );
     event SignerUpdated(address indexed signer);
 
     constructor(
@@ -73,6 +77,13 @@ contract SocioCatClaim is Ownable2Step {
         token.safeTransfer(receiver, amount);
 
         emit Claimed(keccak256(signature), msg.sender, amount);
+    }
+
+    function withdraw(address to, uint256 amount) external onlyOwner {
+        if (to == address(0)) {
+            revert ZeroAddress();
+        }
+        token.safeTransfer(to, amount);
     }
 
     function setSigner(address _signer) external onlyOwner {

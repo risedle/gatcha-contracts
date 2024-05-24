@@ -13,7 +13,11 @@ contract SocioCatClaimTest is Test {
     address public owner;
     uint256 public signerKey;
 
-    event Claimed(bytes32 indexed signatureHash, address indexed to, uint256 amount);
+    event Claimed(
+        bytes32 indexed signatureHash,
+        address indexed to,
+        uint256 amount
+    );
     event SignerUpdated(address indexed signer);
 
     function setUp() public {
@@ -207,5 +211,15 @@ contract SocioCatClaimTest is Test {
         );
         signature = abi.encodePacked(r, s, v);
         vm.stopPrank();
+    }
+
+    function test_withdraw() public {
+        address receiver = 0x220866B1A2219f40e72f5c628B65D54268cA3A9D;
+        token.mint(address(claim), 100);
+
+        vm.startPrank(owner);
+        claim.withdraw(receiver, 100);
+
+        assertEq(token.balanceOf(receiver), 100);
     }
 }
